@@ -175,6 +175,10 @@
       </div>
     </div>
     <div class="card">
+      <h3 style="font-size:1rem;margin-bottom:8px;">所有註冊學生</h3>
+      <div style="overflow-x:auto;"><table id="usersTable"></table></div>
+    </div>
+    <div class="card">
       <h3 style="font-size:1rem;margin-bottom:8px;">學生進度總覽（每個小單元的最佳成績）</h3>
       <div style="overflow-x:auto;"><table id="overviewTable"></table></div>
     </div>
@@ -486,9 +490,26 @@ async function loadAdmin(){
     $("resultsTable").innerHTML=`<tr><td>讀取失敗：${e.message}<br>（請確認 Firestore 安全規則已照教學設定，且你用的是老師帳號）</td></tr>`;
     return;
   }
+  try{
+    const us=await db.collection("users").get();
+    adminUsers=us.docs.map(d=>{const u=d.data(); u._uid=d.id; return u;})
+      .filter(u=>!ADMIN_EMAILS.includes((u.email||"").toLowerCase()));
+  }catch(e){ adminUsers=[]; }
   buildSubunitFilter();
+  renderUsersTable();
   renderOverview();
   renderResultsTable();
+}
+let adminUsers=[];
+function renderUsersTable(){
+  const counts={};
+  adminResults.forEach(r=>{ counts[r.uid]=(counts[r.uid]||0)+1; });
+  let html=`<tr><th>姓名</th><th>Email</th><th class="center">作答次數</th><th>最後登入</th></tr>`;
+  if(adminUsers.length===0) html+=`<tr><td colspan="4">還沒有學生註冊</td></tr>`;
+  adminUsers.sort((a,b)=>(a.name||"").localeCompare(b.name||"","zh-Hant")).forEach(u=>{
+    html+=`<tr><td>${u.name||""}</td><td>${u.email||""}</td><td class="center">${counts[u._uid]||0}</td><td>${fmtDate(u.lastLogin)}</td></tr>`;
+  });
+  $("usersTable").innerHTML=html;
 }
 function allSubunits(){
   const list=[];
