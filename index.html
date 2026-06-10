@@ -22,7 +22,8 @@
   header h1{font-size:1.5rem;font-family:"Noto Serif TC","Microsoft JhengHei",serif;letter-spacing:3px;font-weight:700;}
   header .sub{font-size:.8rem;opacity:.92;letter-spacing:2px;}
   header .userbox{position:absolute;right:16px;top:50%;transform:translateY(-50%);}
-  @media(max-width:780px){ header .userbox{position:static;transform:none;margin-top:6px;} }
+  .langsel{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:auto;padding:5px 8px;margin:0;font-size:.85rem;border-radius:6px;border:none;background:rgba(255,255,255,.92);color:#333;font-family:inherit;}
+  @media(max-width:780px){ header .userbox,.langsel{position:static;transform:none;margin-top:6px;} }
   header .userbox{display:flex;gap:8px;align-items:center;font-size:.9rem;flex-wrap:wrap;}
   .btn{display:inline-block;border:none;border-radius:8px;padding:10px 18px;font-size:1rem;cursor:pointer;background:var(--primary);color:#fff;font-family:inherit;}
   .btn:hover{background:var(--primary-dark);}
@@ -84,7 +85,12 @@
 <header>
   <div class="container">
     <h1>QNA Chinese 華語文能力測驗</h1>
-    <div class="sub">進階級 B1 ‧ 模擬練習系統 ‧ 單元題庫</div>
+    <div class="sub" id="hdrSub">進階級 B1 ‧ 模擬練習系統 ‧ 單元題庫</div>
+    <select id="langSel" class="langsel">
+      <option value="zh-TW">繁體中文</option>
+      <option value="zh-CN">简体中文</option>
+      <option value="vi">Tiếng Việt（需老師同意）</option>
+    </select>
     <div class="userbox" id="userbox" style="display:none;">
       <span id="userName"></span>
       <button class="btn small ghost hidden" id="btnAdmin">教師後台</button>
@@ -109,7 +115,7 @@
         <svg width="48" height="42" viewBox="0 0 46 40" aria-hidden="true"><rect x="4" y="8" width="11" height="26" rx="1.5" fill="#34a853" transform="rotate(-8 9 21)"/><rect x="17" y="6" width="11" height="28" rx="1.5" fill="#ea4335"/><rect x="30" y="8" width="11" height="26" rx="1.5" fill="#4285f4" transform="rotate(8 36 21)"/></svg>
         <div class="brand-serif" style="font-size:1.7rem;font-weight:700;letter-spacing:1px;">QNA Chinese</div>
         <div class="brand-serif" style="font-size:1.05rem;font-weight:600;margin-top:2px;">華語文能力測驗（進階級）B1</div>
-        <div style="font-size:.85rem;color:var(--muted);margin-top:4px;">模擬考系統｜個人學習進度追蹤</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-top:4px;" id="brandSub2">模擬考系統｜個人學習進度追蹤</div>
       </div>
       <div class="tabs">
         <button id="tabLogin" class="active">登入</button>
@@ -118,25 +124,25 @@
       <div id="authMsg"></div>
 
       <div id="loginForm">
-        <label>Email</label>
+        <label id="lblEmail">Email</label>
         <input type="email" id="loginEmail" placeholder="you@example.com">
-        <label>密碼</label>
+        <label id="lblPwd">密碼</label>
         <input type="password" id="loginPass" placeholder="密碼">
         <button class="btn" style="width:100%" id="btnLogin">登入 →</button>
-        <p style="text-align:center;margin:10px 0;color:var(--muted);font-size:.85rem">或</p>
+        <p style="text-align:center;margin:10px 0;color:var(--muted);font-size:.85rem" id="orTxt">或</p>
         <button class="gbtn" id="btnGoogle">
           <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 40.2 44 35 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
-          使用 Google（Gmail）登入
+          <span id="googleTxt">使用 Google（Gmail）登入</span>
         </button>
         <p style="text-align:center;margin-top:12px;"><a href="#" id="linkForgot" style="font-size:.85rem;color:var(--muted);">忘記密碼？</a></p>
       </div>
 
       <div id="registerForm" class="hidden">
-        <label>姓名（老師會看到這個名字）</label>
+        <label id="lblRegName">姓名（老師會看到這個名字）</label>
         <input type="text" id="regName" placeholder="例：王小明 / Maria">
-        <label>Email（建議使用 Gmail）</label>
+        <label id="lblRegEmail">Email（建議使用 Gmail）</label>
         <input type="email" id="regEmail" placeholder="you@gmail.com">
-        <label>密碼（至少6個字）</label>
+        <label id="lblRegPwd">密碼（至少6個字）</label>
         <input type="password" id="regPass" placeholder="密碼">
         <button class="btn" style="width:100%" id="btnRegister">建立帳號</button>
       </div>
@@ -145,7 +151,7 @@
 
   <!-- 單元列表 -->
   <div id="unitsView" class="hidden">
-    <div class="card" style="background:#eff6ff;">
+    <div class="card" style="background:#eff6ff;" id="usageBox">
       <b>📖 使用方式</b>：選一個小單元開始作答。交卷後會看到分數，答錯的題目會有解說。每個單元可以重複練習。
     </div>
     <div id="unitsList"></div>
@@ -160,7 +166,7 @@
     <div id="quizBody"></div>
     <div class="card center">
       <button class="btn green" id="btnSubmit" style="font-size:1.1rem;padding:12px 40px;">交卷</button>
-      <p style="font-size:.85rem;color:var(--muted);margin-top:8px;">交卷後就會看到成績和解說</p>
+      <p style="font-size:.85rem;color:var(--muted);margin-top:8px;" id="submitHint">交卷後就會看到成績和解說</p>
     </div>
   </div>
 
@@ -175,7 +181,7 @@
         <button class="btn gray" id="btnBackHome">回單元列表</button>
       </div>
     </div>
-    <h2 style="font-size:1.05rem;margin:18px 0 4px;">答題回顧（答錯的題目附解說）</h2>
+    <h2 style="font-size:1.05rem;margin:18px 0 4px;" id="reviewTitle">答題回顧（答錯的題目附解說）</h2>
     <div id="reviewBody"></div>
   </div>
 
@@ -187,6 +193,11 @@
         <button class="btn small" id="btnRefreshAdmin">重新整理</button>
         <button class="btn small gray" id="btnExportCsv">下載 CSV</button>
       </div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:1rem;margin-bottom:8px;">越南文介面申請</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:8px;">學生在左上角語言選單點選「Tiếng Việt」就會送出申請，你批准後他才能使用越南文介面。</p>
+      <div style="overflow-x:auto;"><table id="viTable"></table></div>
     </div>
     <div class="card">
       <h3 style="font-size:1rem;margin-bottom:8px;">所有註冊學生</h3>
@@ -206,12 +217,13 @@
     </div>
   </div>
 
-  <p class="footer-note">本平台題目內容取自《華語文能力測驗（進階級）》，僅供本班教學使用，請勿外流或作商業用途。</p>
+  <p class="footer-note" id="footNote">本平台題目內容取自《華語文能力測驗（進階級）》，僅供本班教學使用，請勿外流或作商業用途。</p>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/t2cn.js"></script>
 <script src="quiz-data.js"></script>
 <script>
 /* ============================================================
@@ -244,6 +256,129 @@ function show(view){
 }
 const LETTERS = ["A","B","C","D"];
 
+/* ---------- 多語言 ---------- */
+const I18N = {
+"zh-TW": {
+  sub:"進階級 B1 ‧ 模擬練習系統 ‧ 單元題庫", brand2:"模擬考系統｜個人學習進度追蹤",
+  tabL:"登入", tabR:"新建帳號", lblEmail:"Email", lblPwd:"密碼", login:"登入 →", or:"或",
+  google:"使用 Google（Gmail）登入", forgot:"忘記密碼？",
+  lblRegName:"姓名（老師會看到這個名字）", lblRegEmail:"Email（建議使用 Gmail）", lblRegPwd:"密碼（至少6個字）", register:"建立帳號",
+  home:"單元列表", logout:"登出",
+  usage:"<b>📖 使用方式</b>：選一個小單元開始作答。交卷後會看到分數，答錯的題目會有解說。每個單元可以重複練習。",
+  nQ:n=>`${n} 題`, prep:"題目準備中", notOpen:"尚未開放", notDone:"還沒做過",
+  best:(p,n)=>`最佳 ${p}分｜做過${n}次`, prog:(d,t)=>`已作答 ${d} / ${t} 題`,
+  submit:"交卷", hint:"交卷後就會看到成績和解說", confirmN:n=>`還有 ${n} 題沒作答，確定要交卷嗎？`,
+  sc:p=>`${p} 分`, detail:(c,t,m,s)=>`答對 ${c} / ${t} 題｜用時 ${m} 分 ${s} 秒`,
+  retry:"再做一次", back:"回單元列表", review:"答題回顧（答錯的題目附解說）",
+  right:"✔ 答對", wrong:"✘ 答錯", noAns:"未作答", correct:"正確答案",
+  foot:"本平台題目內容取自《華語文能力測驗（進階級）》，僅供本班教學使用，請勿外流或作商業用途。",
+  viLocked:"Tiếng Việt（需老師同意）", viFree:"Tiếng Việt"
+},
+"zh-CN": {
+  sub:"进阶级 B1 ‧ 模拟练习系统 ‧ 单元题库", brand2:"模拟考系统｜个人学习进度追踪",
+  tabL:"登录", tabR:"新建账号", lblEmail:"Email", lblPwd:"密码", login:"登录 →", or:"或",
+  google:"使用 Google（Gmail）登录", forgot:"忘记密码？",
+  lblRegName:"姓名（老师会看到这个名字）", lblRegEmail:"Email（建议使用 Gmail）", lblRegPwd:"密码（至少6个字）", register:"建立账号",
+  home:"单元列表", logout:"退出登录",
+  usage:"<b>📖 使用方式</b>：选一个小单元开始作答。交卷后会看到分数，答错的题目会有解说。每个单元可以重复练习。",
+  nQ:n=>`${n} 题`, prep:"题目准备中", notOpen:"尚未开放", notDone:"还没做过",
+  best:(p,n)=>`最佳 ${p}分｜做过${n}次`, prog:(d,t)=>`已作答 ${d} / ${t} 题`,
+  submit:"交卷", hint:"交卷后就会看到成绩和解说", confirmN:n=>`还有 ${n} 题没作答，确定要交卷吗？`,
+  sc:p=>`${p} 分`, detail:(c,t,m,s)=>`答对 ${c} / ${t} 题｜用时 ${m} 分 ${s} 秒`,
+  retry:"再做一次", back:"回单元列表", review:"答题回顾（答错的题目附解说）",
+  right:"✔ 答对", wrong:"✘ 答错", noAns:"未作答", correct:"正确答案",
+  foot:"本平台题目内容取自《华语文能力测验（进阶级）》，仅供本班教学使用，请勿外流或作商业用途。",
+  viLocked:"Tiếng Việt（需老师同意）", viFree:"Tiếng Việt"
+},
+"vi": {
+  sub:"Cấp B1 ‧ Hệ thống luyện thi ‧ Ngân hàng đề theo bài", brand2:"Hệ thống thi thử｜Theo dõi tiến độ học tập",
+  tabL:"Đăng nhập", tabR:"Tạo tài khoản", lblEmail:"Email", lblPwd:"Mật khẩu", login:"Đăng nhập →", or:"hoặc",
+  google:"Đăng nhập bằng Google (Gmail)", forgot:"Quên mật khẩu?",
+  lblRegName:"Họ tên (giáo viên sẽ thấy tên này)", lblRegEmail:"Email (nên dùng Gmail)", lblRegPwd:"Mật khẩu (ít nhất 6 ký tự)", register:"Tạo tài khoản",
+  home:"Danh sách bài", logout:"Đăng xuất",
+  usage:"<b>📖 Cách dùng</b>: Chọn một bài để làm. Sau khi nộp bài sẽ thấy điểm số, câu sai sẽ có giải thích. Mỗi bài có thể luyện nhiều lần.",
+  nQ:n=>`${n} câu`, prep:"Đang chuẩn bị", notOpen:"Chưa mở", notDone:"Chưa làm",
+  best:(p,n)=>`Tốt nhất ${p} điểm｜đã làm ${n} lần`, prog:(d,t)=>`Đã trả lời ${d} / ${t} câu`,
+  submit:"Nộp bài", hint:"Sau khi nộp bài sẽ thấy điểm và giải thích", confirmN:n=>`Còn ${n} câu chưa trả lời, bạn chắc chắn muốn nộp bài?`,
+  sc:p=>`${p} điểm`, detail:(c,t,m,s)=>`Đúng ${c} / ${t} câu｜Thời gian ${m} phút ${s} giây`,
+  retry:"Làm lại", back:"Về danh sách bài", review:"Xem lại bài làm (câu sai có giải thích)",
+  right:"✔ Đúng", wrong:"✘ Sai", noAns:"Chưa trả lời", correct:"Đáp án đúng",
+  foot:"Nội dung đề lấy từ sách 《華語文能力測驗（進階級）》, chỉ dùng cho lớp học này, vui lòng không chia sẻ ra ngoài hoặc dùng cho mục đích thương mại.",
+  viLocked:"Tiếng Việt (cần giáo viên phê duyệt)", viFree:"Tiếng Việt"
+}
+};
+let LANG = localStorage.getItem("qna_lang") || "zh-TW";
+let viApproved=false, viRequested=false;
+let __cc=null;
+try{ if(window.OpenCC) __cc=OpenCC.Converter({from:"tw",to:"cn"}); }catch(e){ console.warn("opencc",e); }
+function t(k){ return (I18N[LANG]&&I18N[LANG][k]) || I18N["zh-TW"][k] || k; }
+function Z(s){ return (LANG==="zh-CN"&&__cc&&s)? __cc(s) : s; }
+function applyStatic(){
+  $("hdrSub").textContent=t("sub");
+  $("brandSub2").textContent=t("brand2");
+  $("tabLogin").textContent=t("tabL");
+  $("tabRegister").textContent=t("tabR");
+  $("lblEmail").textContent=t("lblEmail");
+  $("lblPwd").textContent=t("lblPwd");
+  $("btnLogin").textContent=t("login");
+  $("orTxt").textContent=t("or");
+  $("googleTxt").textContent=t("google");
+  $("linkForgot").textContent=t("forgot");
+  $("lblRegName").textContent=t("lblRegName");
+  $("lblRegEmail").textContent=t("lblRegEmail");
+  $("lblRegPwd").textContent=t("lblRegPwd");
+  $("btnRegister").textContent=t("register");
+  $("btnHome").textContent=t("home");
+  $("btnLogout").textContent=t("logout");
+  $("usageBox").innerHTML=t("usage");
+  $("btnSubmit").textContent=t("submit");
+  $("submitHint").textContent=t("hint");
+  $("btnRetry").textContent=t("retry");
+  $("btnBackHome").textContent=t("back");
+  $("reviewTitle").textContent=t("review");
+  $("footNote").textContent=t("foot");
+  updateLangSel();
+}
+function updateLangSel(){
+  const sel=$("langSel"); if(!sel) return;
+  sel.value=LANG;
+  sel.options[2].text=(viApproved||isAdmin)? t("viFree") : t("viLocked");
+}
+function setLang(v){
+  LANG=v; localStorage.setItem("qna_lang",v);
+  applyStatic();
+  if(!$("unitsView").classList.contains("hidden")) renderUnits();
+}
+async function loadViStatus(user){
+  viApproved=false; viRequested=false;
+  try{
+    const ap=await db.collection("langApprovals").doc(user.uid).get();
+    viApproved = ap.exists && ap.data().vi===true;
+    const ud=await db.collection("users").doc(user.uid).get();
+    viRequested = ud.exists && ud.data().viRequested===true;
+  }catch(e){ console.warn(e); }
+  if(LANG==="vi" && !viApproved && !isAdmin){ LANG="zh-TW"; localStorage.setItem("qna_lang",LANG); }
+  applyStatic();
+}
+$("langSel").onchange=async e=>{
+  const v=e.target.value;
+  if(v==="vi" && !isAdmin && !viApproved){
+    e.target.value=LANG;
+    if(!currentUser){ alert("請先登入，再申請使用越南文介面。\nVui lòng đăng nhập trước khi yêu cầu giao diện tiếng Việt."); return; }
+    if(!viRequested){
+      try{
+        await db.collection("users").doc(currentUser.uid).set({viRequested:true, viRequestedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        viRequested=true;
+        alert("已送出申請，老師同意後就可以使用越南文介面。\nĐã gửi yêu cầu. Sau khi giáo viên phê duyệt, bạn có thể dùng giao diện tiếng Việt.");
+      }catch(err){ alert("申請送出失敗："+err.message); }
+    }else{
+      alert("申請審核中，請等老師同意。\nYêu cầu của bạn đang chờ giáo viên phê duyệt.");
+    }
+    return;
+  }
+  setLang(v);
+};
+
 /* ---------- 初始化 ---------- */
 if(!isConfigured){
   $("setupNotice").classList.remove("hidden");
@@ -260,10 +395,14 @@ if(!isConfigured){
       $("btnAdmin").classList.toggle("hidden", !isAdmin);
       await ensureUserDoc(user);
       await loadMyBest();
+      await loadViStatus(user);
       renderUnits();
       show("unitsView");
     }else{
       $("userbox").style.display="none";
+      viApproved=false; viRequested=false;
+      if(LANG==="vi"){ LANG="zh-TW"; localStorage.setItem("qna_lang",LANG); }
+      applyStatic();
       show("authView");
     }
   });
@@ -345,18 +484,18 @@ function renderUnits(){
   QUIZ_DATA.units.forEach(unit=>{
     const block=document.createElement("div");
     block.className="unit-block";
-    block.innerHTML=`<h2>Unit ${unit.id}｜${unit.title}</h2>`;
+    block.innerHTML=`<h2>Unit ${unit.id}｜${Z(unit.title)}</h2>`;
     unit.subunits.forEach(sub=>{
       const total=countQuestions(sub);
       const card=document.createElement("div");
       if(total===0){
         card.className="sub-card empty";
-        card.innerHTML=`<div><b>${sub.id}</b>　${sub.title}<div class="info">題目準備中</div></div><span class="badge">尚未開放</span>`;
+        card.innerHTML=`<div><b>${sub.id}</b>　${Z(sub.title)}<div class="info">${t("prep")}</div></div><span class="badge">${t("notOpen")}</span>`;
       }else{
         const best=myBest[sub.id];
-        const badge = best ? `<span class="badge ${best.percent>=80?'good':''}">最佳 ${best.percent}分｜做過${best.attempts}次</span>` : `<span class="badge">還沒做過</span>`;
+        const badge = best ? `<span class="badge ${best.percent>=80?'good':''}">${t("best")(best.percent,best.attempts)}</span>` : `<span class="badge">${t("notDone")}</span>`;
         card.className="sub-card";
-        card.innerHTML=`<div><b>${sub.id}</b>　${sub.title}<div class="info">${total} 題</div></div>${badge}`;
+        card.innerHTML=`<div><b>${sub.id}</b>　${Z(sub.title)}<div class="info">${t("nQ")(total)}</div></div>${badge}`;
         card.onclick=()=>startQuiz(unit,sub);
       }
       block.appendChild(card);
@@ -368,17 +507,17 @@ function renderUnits(){
 /* ---------- 考試 ---------- */
 function startQuiz(unit,sub){
   currentUnit=unit; currentSub=sub; quizStartTime=Date.now();
-  $("quizTitle").textContent=`${sub.id}　${sub.title}`;
+  $("quizTitle").textContent=`${sub.id}　${Z(sub.title)}`;
   const body=$("quizBody"); body.innerHTML="";
   let qIndex=0;
   sub.sections.forEach((sec,sIdx)=>{
     const st=document.createElement("div");
-    st.className="section-title"; st.textContent=sec.name;
+    st.className="section-title"; st.textContent=Z(sec.name);
     body.appendChild(st);
-    if(sec.instructions){ const ins=document.createElement("div"); ins.className="instructions"; ins.textContent=sec.instructions; body.appendChild(ins); }
+    if(sec.instructions){ const ins=document.createElement("div"); ins.className="instructions"; ins.textContent=Z(sec.instructions); body.appendChild(ins); }
     if(sec.audio){ const au=document.createElement("div"); au.className="audiobox"; au.innerHTML=`<audio controls preload="none" src="${sec.audio}" style="width:100%"></audio>`; body.appendChild(au); }
-    if(sec.passage){ const p=document.createElement("div"); p.className="passage"; p.textContent=sec.passage; body.appendChild(p); }
-    if(sec.material){ const m=document.createElement("div"); m.className="material"; m.textContent=sec.material; body.appendChild(m); }
+    if(sec.passage){ const p=document.createElement("div"); p.className="passage"; p.textContent=Z(sec.passage); body.appendChild(p); }
+    if(sec.material){ const m=document.createElement("div"); m.className="material"; m.textContent=Z(sec.material); body.appendChild(m); }
     sec.questions.forEach((q,qIdx)=>{
       qIndex++;
       const qd=document.createElement("div");
@@ -387,9 +526,9 @@ function startQuiz(unit,sub){
       q.opts.forEach((o,i)=>{
         opts+=`<label class="opt" data-s="${sIdx}" data-q="${qIdx}" data-i="${i}">
           <input type="radio" name="q${sIdx}_${qIdx}" value="${i}">
-          <span><b>(${LETTERS[i]})</b> ${o}</span></label>`;
+          <span><b>(${LETTERS[i]})</b> ${Z(o)}</span></label>`;
       });
-      qd.innerHTML=`<div class="qtext">${qIndex}. ${q.q.replace(/＿＿/g,"＿＿＿")}</div>${opts}`;
+      qd.innerHTML=`<div class="qtext">${qIndex}. ${Z(q.q).replace(/＿＿/g,"＿＿＿")}</div>${opts}`;
       body.appendChild(qd);
     });
   });
@@ -408,13 +547,13 @@ function startQuiz(unit,sub){
 function updateProgress(){
   const total=countQuestions(currentSub);
   const done=$("quizBody").querySelectorAll("input:checked").length;
-  $("quizProgress").textContent=`已作答 ${done} / ${total} 題`;
+  $("quizProgress").textContent=t("prog")(done,total);
 }
 
 $("btnSubmit").onclick=async()=>{
   const total=countQuestions(currentSub);
   const done=$("quizBody").querySelectorAll("input:checked").length;
-  if(done<total && !confirm(`還有 ${total-done} 題沒作答，確定要交卷嗎？`)) return;
+  if(done<total && !confirm(t("confirmN")(total-done))) return;
 
   let correct=0; const answers=[];
   currentSub.sections.forEach((sec,sIdx)=>{
@@ -453,18 +592,18 @@ $("btnSubmit").onclick=async()=>{
 /* ---------- 成績與回顧 ---------- */
 function renderResult(){
   const r=lastResult;
-  $("resultTitle").textContent=`${currentSub.id}　${currentSub.title}`;
-  $("resultScore").textContent=`${r.percent} 分`;
-  $("resultDetail").textContent=`答對 ${r.correct} / ${r.total} 題｜用時 ${Math.floor(r.duration/60)} 分 ${r.duration%60} 秒`;
+  $("resultTitle").textContent=`${currentSub.id}　${Z(currentSub.title)}`;
+  $("resultScore").textContent=t("sc")(r.percent);
+  $("resultDetail").textContent=t("detail")(r.correct,r.total,Math.floor(r.duration/60),r.duration%60);
   const body=$("reviewBody"); body.innerHTML="";
   let qIndex=0, ai=0;
   currentSub.sections.forEach(sec=>{
     const st=document.createElement("div");
-    st.className="section-title"; st.textContent=sec.name;
+    st.className="section-title"; st.textContent=Z(sec.name);
     body.appendChild(st);
     if(sec.audio){ const au=document.createElement("div"); au.className="audiobox"; au.innerHTML=`<audio controls preload="none" src="${sec.audio}" style="width:100%"></audio>`; body.appendChild(au); }
-    if(sec.passage){ const p=document.createElement("div"); p.className="passage"; p.textContent=sec.passage; body.appendChild(p); }
-    if(sec.material){ const m=document.createElement("div"); m.className="material"; m.textContent=sec.material; body.appendChild(m); }
+    if(sec.passage){ const p=document.createElement("div"); p.className="passage"; p.textContent=Z(sec.passage); body.appendChild(p); }
+    if(sec.material){ const m=document.createElement("div"); m.className="material"; m.textContent=Z(sec.material); body.appendChild(m); }
     sec.questions.forEach(q=>{
       qIndex++;
       const a=lastResult.answers[ai++];
@@ -477,15 +616,15 @@ function renderResult(){
         if(i===q.ans) cls+=" correct";
         else if(i===a.chosen) cls+=" wrong";
         const mark = i===q.ans ? " ✔" : (i===a.chosen ? " ✘" : "");
-        opts+=`<div class="${cls}"><span><b>(${LETTERS[i]})</b> ${o}${mark}</span></div>`;
+        opts+=`<div class="${cls}"><span><b>(${LETTERS[i]})</b> ${Z(o)}${mark}</span></div>`;
       });
-      const status = right? `<span style="color:var(--green)">✔ 答對</span>`
-        : (a.chosen===-1? `<span style="color:var(--red)">未作答</span>`:`<span style="color:var(--red)">✘ 答錯</span>`);
+      const status = right? `<span style="color:var(--green)">${t("right")}</span>`
+        : (a.chosen===-1? `<span style="color:var(--red)">${t("noAns")}</span>`:`<span style="color:var(--red)">${t("wrong")}</span>`);
       let explain="";
       if(!right){
-        explain=`<div class="explain"><b>正確答案：(${LETTERS[q.ans]}) ${q.opts[q.ans]}</b><br>${q.exp||""}</div>`;
+        explain=`<div class="explain"><b>${t("correct")}：(${LETTERS[q.ans]}) ${Z(q.opts[q.ans])}</b><br>${Z(q.exp||"")}</div>`;
       }
-      qd.innerHTML=`<div class="qtext">${qIndex}. ${q.q}　${status}</div>${opts}${explain}`;
+      qd.innerHTML=`<div class="qtext">${qIndex}. ${Z(q.q)}　${status}</div>${opts}${explain}`;
       body.appendChild(qd);
     });
   });
@@ -509,11 +648,38 @@ async function loadAdmin(){
     adminUsers=us.docs.map(d=>{const u=d.data(); u._uid=d.id; return u;})
       .filter(u=>!ADMIN_EMAILS.includes((u.email||"").toLowerCase()));
   }catch(e){ adminUsers=[]; }
+  adminApprovals={};
+  try{
+    const ap=await db.collection("langApprovals").get();
+    ap.forEach(d=>{ adminApprovals[d.id]=d.data(); });
+  }catch(e){ console.warn(e); }
   buildSubunitFilter();
+  renderViTable();
   renderUsersTable();
   renderOverview();
   renderResultsTable();
 }
+let adminApprovals={};
+function renderViTable(){
+  const rows=adminUsers.filter(u=>u.viRequested || (adminApprovals[u._uid]&&adminApprovals[u._uid].vi));
+  let html=`<tr><th>學生</th><th>狀態</th><th class="center">操作</th></tr>`;
+  if(rows.length===0) html+=`<tr><td colspan="3">目前沒有申請</td></tr>`;
+  rows.forEach(u=>{
+    const ok=adminApprovals[u._uid]&&adminApprovals[u._uid].vi;
+    html+=`<tr><td>${u.name||""}<br><span style="color:var(--muted);font-size:.78rem">${u.email||""}</span></td>
+      <td>${ok?'<span style="color:var(--green)">已批准</span>':'<span style="color:#b45309">等待批准</span>'}</td>
+      <td class="center"><button class="btn small ${ok?'gray':'green'}" onclick="setVi('${u._uid}',${!ok})">${ok?'取消批准':'批准'}</button></td></tr>`;
+  });
+  $("viTable").innerHTML=html;
+}
+async function setVi(uid,val){
+  try{
+    await db.collection("langApprovals").doc(uid).set({vi:val, by:currentUser.email, at:firebase.firestore.FieldValue.serverTimestamp()});
+    adminApprovals[uid]={vi:val};
+    renderViTable();
+  }catch(e){ alert("設定失敗："+e.message); }
+}
+window.setVi=setVi;
 let adminUsers=[];
 function renderUsersTable(){
   const counts={};
@@ -602,6 +768,7 @@ $("btnExportCsv").onclick=()=>{
   a.download="成績紀錄.csv";
   a.click();
 };
+applyStatic();
 </script>
 </body>
 </html>
