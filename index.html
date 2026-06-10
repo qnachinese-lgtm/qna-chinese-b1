@@ -554,4 +554,19 @@ function renderResultsTable(){
   });
   $("resultsTable").innerHTML=html;
 }
-$(
+$("btnRefreshAdmin").onclick=loadAdmin;
+$("btnExportCsv").onclick=()=>{
+  const rows=filteredResults();
+  let csv="﻿時間,姓名,Email,小單元,分數,答對,總題數,用時(秒)\n";
+  rows.forEach(r=>{
+    csv+=`"${fmtDate(r.finishedAt)}","${r.name||""}","${r.email||""}","${r.subunitId}",${r.percent},${r.score},${r.total},${r.durationSec||0}\n`;
+  });
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="成績紀錄.csv";
+  a.click();
+};
+</script>
+</body>
+</html>
