@@ -729,13 +729,41 @@ let adminUsers=[];
 function renderUsersTable(){
   const counts={};
   adminResults.forEach(r=>{ counts[r.uid]=(counts[r.uid]||0)+1; });
-  let html=`<tr><th>姓名</th><th>Email</th><th class="center">作答次數</th><th>最後登入</th></tr>`;
-  if(adminUsers.length===0) html+=`<tr><td colspan="4">還沒有學生註冊</td></tr>`;
+  let html=`<tr><th>姓名</th><th>Email</th><th class="center">作答次數</th><th>最後登入</th><th class="center">操作</th></tr>`;
+  if(adminUsers.length===0) html+=`<tr><td colspan="5">還沒有學生註冊</td></tr>`;
   adminUsers.sort((a,b)=>(a.name||"").localeCompare(b.name||"","zh-Hant")).forEach(u=>{
-    html+=`<tr><td>${u.name||""}</td><td>${u.email||""}</td><td class="center">${counts[u._uid]||0}</td><td>${fmtDate(u.lastLogin)}</td></tr>`;
+    html+=`<tr><td>${u.name||""}</td><td>${u.email||""}</td><td class="center">${counts[u._uid]||0}</td><td>${fmtDate(u.lastLogin)}</td>
+      <td class="center" style="white-space:nowrap"><button class="btn small" onclick="editUser('${u._uid}')">編輯</button> <button class="btn small" style="background:var(--red)" onclick="deleteUser('${u._uid}')">刪除</button></td></tr>`;
   });
   $("usersTable").innerHTML=html;
 }
+async function editUser(uid){
+  const u=adminUsers.find(x=>x._uid===uid); if(!u) return;
+  const name=prompt("修改學生姓名：", u.name||"");
+  if(name===null || !name.trim()) return;
+  try{
+    await db.collection("users").doc(uid).set({name:name.trim()},{merge:true});
+    u.name=name.trim();
+    renderUsersTable(); renderOverview(); renderViTable();
+  }catch(e){ alert("修改失敗："+e.message); }
+}
+async function deleteUser(uid){
+  const u=adminUsers.find(x=>x._uid===uid); if(!u) return;
+  if(!confirm(`確定要刪除學生「${u.name||u.email||uid}」嗎？\n\n會一併刪除他的所有成績紀錄，無法復原。`)) return;
+  try{
+    const rs=await db.collection("results").where("uid","==",uid).get();
+    const batch=db.batch();
+    rs.forEach(d=>batch.delete(d.ref));
+    batch.delete(db.collection("users").doc(uid));
+    batch.delete(db.collection("langApprovals").doc(uid));
+    await batch.commit();
+    adminUsers=adminUsers.filter(x=>x._uid!==uid);
+    adminResults=adminResults.filter(r=>r.uid!==uid);
+    delete adminApprovals[uid];
+    renderViTable(); renderUsersTable(); renderOverview(); renderResultsTable();
+  }catch(e){ alert("刪除失敗："+e.message); }
+}
+window.editUser=editUser; window.deleteUser=deleteUser;
 function allSubunits(){
   const list=[];
   QUIZ_DATA.units.forEach(u=>u.subunits.forEach(s=>{ if(s.sections.length) list.push(s); }));
@@ -751,9 +779,10 @@ function buildSubunitFilter(){
 function renderOverview(){
   const subs=allSubunits();
   const students={};
+  const nameByUid={}; adminUsers.forEach(u=>{ nameByUid[u._uid]=u.name; });
   adminResults.forEach(r=>{
     const key=r.uid;
-    if(!students[key]) students[key]={name:r.name||r.email, email:r.email, best:{}, count:0};
+    if(!students[key]) students[key]={name:nameByUid[r.uid]||r.name||r.email, email:r.email, best:{}, count:0};
     students[key].count++;
     const b=students[key].best[r.subunitId];
     if(b===undefined || r.percent>b) students[key].best[r.subunitId]=r.percent;
