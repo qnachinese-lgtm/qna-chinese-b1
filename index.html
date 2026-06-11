@@ -517,20 +517,20 @@ function startQuiz(unit,sub){
     st.className="section-title"; st.textContent=Z(sec.name);
     body.appendChild(st);
     if(sec.instructions){ const ins=document.createElement("div"); ins.className="instructions"; ins.textContent=Z(sec.instructions); body.appendChild(ins); }
-    if(sec.audio){ const au=document.createElement("div"); au.className="audiobox"; au.innerHTML=`<audio controls preload="none" src="${sec.audio}" style="width:100%"></audio>`; body.appendChild(au); }
     if(sec.passage){ const p=document.createElement("div"); p.className="passage"; p.textContent=Z(sec.passage); body.appendChild(p); }
     if(sec.material){ const m=document.createElement("div"); m.className="material"; m.textContent=Z(sec.material); body.appendChild(m); }
     sec.questions.forEach((q,qIdx)=>{
       qIndex++;
       const qd=document.createElement("div");
       qd.className="question"; qd.id=`q_${sIdx}_${qIdx}`;
+      const qa = sec.audio ? `<div class="audiobox"><audio controls preload="none" src="${sec.audio.replace(/\.mp3$/, `_q${q.n}.mp3`)}" style="width:100%"></audio></div>` : "";
       let opts="";
       q.opts.forEach((o,i)=>{
         opts+=`<label class="opt" data-s="${sIdx}" data-q="${qIdx}" data-i="${i}">
           <input type="radio" name="q${sIdx}_${qIdx}" value="${i}">
           <span><b>(${LETTERS[i]})</b> ${Z(o)}</span></label>`;
       });
-      qd.innerHTML=`<div class="qtext">${qIndex}. ${Z(q.q).replace(/＿＿/g,"＿＿＿")}</div>${opts}`;
+      qd.innerHTML=`<div class="qtext">${qIndex}. ${Z(q.q).replace(/＿＿/g,"＿＿＿")}</div>${qa}${opts}`;
       body.appendChild(qd);
     });
   });
@@ -603,12 +603,12 @@ function renderResult(){
     const st=document.createElement("div");
     st.className="section-title"; st.textContent=Z(sec.name);
     body.appendChild(st);
-    if(sec.audio){ const au=document.createElement("div"); au.className="audiobox"; au.innerHTML=`<audio controls preload="none" src="${sec.audio}" style="width:100%"></audio>`; body.appendChild(au); }
     if(sec.passage){ const p=document.createElement("div"); p.className="passage"; p.textContent=Z(sec.passage); body.appendChild(p); }
     if(sec.material){ const m=document.createElement("div"); m.className="material"; m.textContent=Z(sec.material); body.appendChild(m); }
     sec.questions.forEach(q=>{
       qIndex++;
       const a=lastResult.answers[ai++];
+      const qa = sec.audio ? `<div class="audiobox"><audio controls preload="none" src="${sec.audio.replace(/\.mp3$/, `_q${q.n}.mp3`)}" style="width:100%"></audio></div>` : "";
       const right=a.chosen===q.ans;
       const qd=document.createElement("div");
       qd.className="question";
@@ -626,7 +626,7 @@ function renderResult(){
       if(!right){
         explain=`<div class="explain"><b>${t("correct")}：(${LETTERS[q.ans]}) ${Z(q.opts[q.ans])}</b><br>${Z(q.exp||"")}</div>`;
       }
-      qd.innerHTML=`<div class="qtext">${qIndex}. ${Z(q.q)}　${status}</div>${opts}${explain}`;
+      qd.innerHTML=`<div class="qtext">${qIndex}. ${Z(q.q)}　${status}</div>${qa}${opts}${explain}`;
       body.appendChild(qd);
     });
   });
