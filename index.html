@@ -6,7 +6,7 @@
 <title>QNA Chinese｜華語文能力測驗 B1 練習平台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --primary:#2563eb; --primary-dark:#1e40af; --bg:#f5efe4; --card:#ffffff; --brand-red:#a4292e;
@@ -16,6 +16,8 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
   .brand-serif{font-family:"Noto Serif TC","Microsoft JhengHei",serif;}
+  body.lang-cn{font-family:"Noto Sans SC","Noto Sans TC","Microsoft YaHei",sans-serif;}
+  body.lang-cn .brand-serif, body.lang-cn header h1, body.lang-cn .unit-block h2{font-family:"Noto Serif SC","Noto Serif TC","SimSun",serif;}
   .container{max-width:860px;margin:0 auto;padding:16px;}
   header{background:linear-gradient(120deg,#7a1c1c 0%,#a4292e 55%,#c0482f 100%);color:#fff;padding:14px 0 16px;}
   header .container{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;padding-top:0;padding-bottom:0;}
@@ -316,6 +318,7 @@ try{ if(window.OpenCC) __cc=OpenCC.Converter({from:"tw",to:"cn"}); }catch(e){ co
 function t(k){ return (I18N[LANG]&&I18N[LANG][k]) || I18N["zh-TW"][k] || k; }
 function Z(s){ return (LANG==="zh-CN"&&__cc&&s)? __cc(s) : s; }
 function applyStatic(){
+  document.body.classList.toggle("lang-cn", LANG==="zh-CN");
   $("hdrSub").textContent=t("sub");
   $("brandSub2").textContent=t("brand2");
   $("tabLogin").textContent=t("tabL");
