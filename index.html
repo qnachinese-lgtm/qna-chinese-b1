@@ -139,6 +139,7 @@
           <span id="googleTxt">使用 Google（Gmail）登入</span>
         </button>
         <p style="text-align:center;margin-top:12px;"><a href="#" id="linkForgot" style="font-size:.85rem;color:var(--muted);">忘記密碼？</a></p>
+        <p style="text-align:center;margin-top:8px;border-top:1px solid var(--border);padding-top:12px;"><a href="#" id="linkTeacher" style="font-size:.85rem;color:var(--muted);">教師登入（管理者後臺）</a></p>
       </div>
 
       <div id="registerForm" class="hidden">
@@ -149,6 +150,14 @@
         <label id="lblRegPwd">密碼（至少6個字）</label>
         <input type="password" id="regPass" placeholder="密碼">
         <button class="btn" style="width:100%" id="btnRegister">建立帳號</button>
+      </div>
+
+      <div id="teacherForm" class="hidden">
+        <p style="text-align:center;font-weight:bold;margin-bottom:10px;">管理者後臺</p>
+        <label>教師密碼</label>
+        <input type="password" id="teacherPass" placeholder="輸入教師密碼">
+        <button class="btn" style="width:100%" id="btnTeacherLogin">進入後台 →</button>
+        <p style="text-align:center;margin-top:12px;"><a href="#" id="linkBackStudent" style="font-size:.85rem;color:var(--muted);">← 返回學生登入</a></p>
       </div>
     </div>
   </div>
@@ -402,7 +411,8 @@ if(!isConfigured){
       await loadMyBest();
       await loadViStatus(user);
       renderUnits();
-      show("unitsView");
+      if(isAdmin){ loadAdmin(); show("adminView"); }
+      else { show("unitsView"); }
     }else{
       $("userbox").style.display="none";
       viApproved=false; viRequested=false;
@@ -464,6 +474,29 @@ $("linkForgot").onclick=async(ev)=>{
   try{ await auth.sendPasswordResetEmail(email); $("authMsg").innerHTML='<div class="msg ok">已寄出重設密碼的信，請到信箱收信</div>'; }
   catch(e){ authError(e); }
 };
+const TEACHER_EMAIL = "qnachinese@gmail.com";
+$("linkTeacher").onclick=ev=>{
+  ev.preventDefault();
+  $("loginForm").classList.add("hidden");
+  $("registerForm").classList.add("hidden");
+  document.querySelector(".tabs").classList.add("hidden");
+  $("teacherForm").classList.remove("hidden");
+  $("authMsg").innerHTML="";
+};
+$("linkBackStudent").onclick=ev=>{
+  ev.preventDefault();
+  $("teacherForm").classList.add("hidden");
+  document.querySelector(".tabs").classList.remove("hidden");
+  $("loginForm").classList.remove("hidden");
+  $("authMsg").innerHTML="";
+};
+$("btnTeacherLogin").onclick=async()=>{
+  const pwd=$("teacherPass").value;
+  if(!pwd){ $("authMsg").innerHTML='<div class="msg error">請輸入教師密碼</div>'; return; }
+  try{ await auth.signInWithEmailAndPassword(TEACHER_EMAIL, pwd); }
+  catch(e){ $("authMsg").innerHTML='<div class="msg error">教師密碼錯誤</div>'; }
+};
+$("teacherPass") && ($("teacherPass").onkeydown=e=>{ if(e.key==="Enter") $("btnTeacherLogin").click(); });
 $("btnLogout").onclick=()=>auth.signOut();
 $("btnHome").onclick=()=>{ renderUnits(); show("unitsView"); };
 $("btnAdmin").onclick=()=>{ loadAdmin(); show("adminView"); };
