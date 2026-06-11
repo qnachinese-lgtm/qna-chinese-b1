@@ -208,6 +208,16 @@
       </div>
     </div>
     <div class="card">
+      <h3 style="font-size:1rem;margin-bottom:8px;">幫學生建立帳號</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input id="naName" placeholder="姓名" style="flex:1;min-width:130px;margin:0;">
+        <input id="naEmail" type="email" placeholder="Email" style="flex:1.4;min-width:180px;margin:0;">
+        <input id="naPass" type="text" placeholder="初始密碼（至少6字）" style="flex:1;min-width:160px;margin:0;">
+        <button class="btn" id="btnCreateStudent" style="white-space:nowrap;">建立帳號</button>
+      </div>
+      <p style="font-size:.85rem;margin-top:8px;color:var(--muted);">建立後把 Email 和密碼告訴學生即可直接登入（老師建立的帳號不需收驗證信）。學生之後可用「忘記密碼」自行改密碼。</p>
+    </div>
+    <div class="card">
       <h3 style="font-size:1rem;margin-bottom:8px;">越南文介面申請</h3>
       <p style="font-size:.85rem;color:var(--muted);margin-bottom:8px;">學生在左上角語言選單點選「Tiếng Việt」就會送出申請，你批准後他才能使用越南文介面。</p>
       <div style="overflow-x:auto;"><table id="viTable"></table></div>
@@ -415,7 +425,11 @@ if(!isConfigured){
           }
         }catch(e){ console.warn(e); }
       }
+      let _pre=false;
       if(!_adm && !user.emailVerified){
+        try{ const pd=await db.collection("preapproved").doc(user.uid).get(); _pre=pd.exists; }catch(e){ console.warn(e); }
+      }
+      if(!_adm && !user.emailVerified && !_pre){
         try{ await user.sendEmailVerification(); }catch(e){ console.warn(e); }
         $("authMsg").innerHTML='<div class="msg ok">已寄出驗證信到 '+(user.email||"")+'。<br>請先到信箱點擊驗證連結，再回來登入（找不到信請查看垃圾郵件）。<br>Vui lòng nhấp vào liên kết trong email xác minh trước khi đăng nhập.</div>';
         currentUser=null;
@@ -784,6 +798,27 @@ async function deleteUser(uid){
   }catch(e){ alert("刪除失敗："+e.message); }
 }
 window.editUser=editUser; window.deleteUser=deleteUser;
+let __app2=null;
+$("btnCreateStudent").onclick=async()=>{
+  const name=$("naName").value.trim(), email=$("naEmail").value.trim(), pwd=$("naPass").value;
+  if(!name||!email||pwd.length<6){ alert("請填寫姓名、Email，密碼至少6個字。"); return; }
+  try{
+    if(!__app2) __app2=firebase.initializeApp(firebaseConfig,"acctCreator");
+    const auth2=__app2.auth();
+    const cred=await auth2.createUserWithEmailAndPassword(email,pwd);
+    try{ await cred.user.updateProfile({displayName:name}); }catch(e){}
+    const newUid=cred.user.uid;
+    await auth2.signOut();
+    await db.collection("users").doc(newUid).set({name, email, createdByTeacher:true, createdAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    await db.collection("preapproved").doc(newUid).set({v:true, by:currentUser.email, at:firebase.firestore.FieldValue.serverTimestamp()});
+    $("naName").value=""; $("naEmail").value=""; $("naPass").value="";
+    alert("帳號建立成功！\n\nEmail："+email+"\n密碼："+pwd+"\n\n請把帳號密碼告訴學生，可直接登入。");
+    loadAdmin();
+  }catch(e){
+    const map={"auth/email-already-in-use":"這個Email已經註冊過了","auth/invalid-email":"Email格式不正確","auth/weak-password":"密碼太短（至少6個字）"};
+    alert("建立失敗："+(map[e.code]||e.message));
+  }
+};
 function allSubunits(){
   const list=[];
   QUIZ_DATA.units.forEach(u=>u.subunits.forEach(s=>{ if(s.sections.length) list.push(s); }));
