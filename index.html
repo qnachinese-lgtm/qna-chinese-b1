@@ -403,7 +403,15 @@ if(!isConfigured){
   auth.onAuthStateChanged(async user=>{
     currentUser = user;
     if(user){
-      isAdmin = ADMIN_EMAILS.includes((user.email||"").toLowerCase());
+      const _adm = ADMIN_EMAILS.includes((user.email||"").toLowerCase());
+      if(!_adm && !user.emailVerified){
+        try{ await user.sendEmailVerification(); }catch(e){ console.warn(e); }
+        $("authMsg").innerHTML='<div class="msg ok">已寄出驗證信到 '+(user.email||"")+'。<br>請先到信箱點擊驗證連結，再回來登入（找不到信請查看垃圾郵件）。<br>Vui lòng nhấp vào liên kết trong email xác minh trước khi đăng nhập.</div>';
+        currentUser=null;
+        await auth.signOut();
+        return;
+      }
+      isAdmin = _adm;
       $("userbox").style.display="flex";
       $("userName").textContent = (user.displayName||user.email) + (isAdmin?"（老師）":"");
       $("btnAdmin").classList.toggle("hidden", !isAdmin);
