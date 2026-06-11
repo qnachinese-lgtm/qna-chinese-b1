@@ -404,6 +404,17 @@ if(!isConfigured){
     currentUser = user;
     if(user){
       const _adm = ADMIN_EMAILS.includes((user.email||"").toLowerCase());
+      if(!_adm){
+        try{
+          const ban = await db.collection("banned").doc(user.uid).get();
+          if(ban.exists){
+            $("authMsg").innerHTML='<div class="msg error">此帳號已被老師移除，無法繼續使用。如要使用平台，請重新註冊一個新帳號。<br>Tài khoản này đã bị giáo viên xóa. Vui lòng đăng ký tài khoản mới.</div>';
+            currentUser=null;
+            try{ await user.delete(); }catch(e){ await auth.signOut(); }
+            return;
+          }
+        }catch(e){ console.warn(e); }
+      }
       if(!_adm && !user.emailVerified){
         try{ await user.sendEmailVerification(); }catch(e){ console.warn(e); }
         $("authMsg").innerHTML='<div class="msg ok">已寄出驗證信到 '+(user.email||"")+'。<br>請先到信箱點擊驗證連結，再回來登入（找不到信請查看垃圾郵件）。<br>Vui lòng nhấp vào liên kết trong email xác minh trước khi đăng nhập.</div>';
@@ -757,13 +768,14 @@ async function editUser(uid){
 }
 async function deleteUser(uid){
   const u=adminUsers.find(x=>x._uid===uid); if(!u) return;
-  if(!confirm(`確定要刪除學生「${u.name||u.email||uid}」嗎？\n\n會一併刪除他的所有成績紀錄，無法復原。`)) return;
+  if(!confirm(`確定要刪除學生「${u.name||u.email||uid}」嗎？\n\n會一併刪除他的所有成績紀錄，且他的帳號將無法再使用（需要重新註冊），無法復原。`)) return;
   try{
     const rs=await db.collection("results").where("uid","==",uid).get();
     const batch=db.batch();
     rs.forEach(d=>batch.delete(d.ref));
     batch.delete(db.collection("users").doc(uid));
     batch.delete(db.collection("langApprovals").doc(uid));
+    batch.set(db.collection("banned").doc(uid), {email:u.email||"", name:u.name||"", at:firebase.firestore.FieldValue.serverTimestamp(), by:currentUser.email});
     await batch.commit();
     adminUsers=adminUsers.filter(x=>x._uid!==uid);
     adminResults=adminResults.filter(r=>r.uid!==uid);
